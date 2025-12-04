@@ -1,19 +1,17 @@
 ; ==================================================================
-;                  JOGO ICMC GALAXY - FUNDOS DINÂMICOS
+; jogo icmc galaxy - codigo final
 ; ==================================================================
 
-jmp TelaDeTitulo    ; Começa na abertura
+jmp TelaDeTitulo           ; inicio do programa
 
-; --- VARIÁVEIS GLOBAIS ---
+; --- variaveis globais ---
 
 PosJogador: var #1
-static PosJogador + #0, #1140
-; Variável de Fundo
+static PosJogador + #0, #1140   ; posicao do jogador
 
 PtrFundoAtual: var #1
-static PtrFundoAtual + #0, #0
+static PtrFundoAtual + #0, #0   ; endereco do fundo atual
 
-; Placar
 mensagemlevel: var #7
 static mensagemlevel + #0, #'L'
 static mensagemlevel + #1, #'E'
@@ -21,54 +19,60 @@ static mensagemlevel + #2, #'V'
 static mensagemlevel + #3, #'E'
 static mensagemlevel + #4, #'L'
 static mensagemlevel + #5, #':'
-static mensagemlevel + #6, #0
+static mensagemlevel + #6, #0   ; finalizador de string
 
 Level: var #1
-static Level + #0, #1 
+static Level + #0, #1           ; nivel atual
 
 GameSpeed: var #1
-static GameSpeed + #0, #100   
+static GameSpeed + #0, #100     ; velocidade global do jogo
 
-; Inimigo
 AlienTimer: var #1
-static AlienTimer + #0, #0
-AlienSpeed: var #1
-static AlienSpeed + #0, #50
-AlienPos: var #1
-static AlienPos + #0, #250
-AlienDir: var #1
-static AlienDir + #0, #1
-AlienVivo: var #1
-static AlienVivo + #0, #1
+static AlienTimer + #0, #0      ; timer interno do alien
 
-; Tiro
+AlienSpeed: var #1
+static AlienSpeed + #0, #50     ; velocidade do alien
+
+AlienPos: var #1
+static AlienPos + #0, #250      ; posicao do alien
+
+AlienDir: var #1
+static AlienDir + #0, #1        ; direcao do alien
+
+AlienVivo: var #1
+static AlienVivo + #0, #1       ; estado do alien
+
 TiroTimer: var #1
-static TiroTimer + #0, #0
+static TiroTimer + #0, #0       ; timer interno do tiro
+
 TiroSpeed: var #1
-static TiroSpeed + #0, #13  
+static TiroSpeed + #0, #13      ; velocidade do tiro
+
 TiroStatus: var #1
-static TiroStatus + #0, #0
+static TiroStatus + #0, #0      ; estado do tiro
+
 TiroPos: var #1
-static TiroPos + #0, #0
+static TiroPos + #0, #0         ; posicao do tiro
 
 Score: var #1
-static Score + #0, #0
+static Score + #0, #0           ; pontuacao
 
 ; ==================================================================
-; 1. TELA DE TÍTULO
+; 1. tela de titulo
 ; ==================================================================
+
 TelaDeTitulo:
-    call printTelaInicioScreen
+    call printTelaInicioScreen  ; desenha tela inicial
     
 LoopEsperaEnter:
     loadn r1, #255
-    inchar r0
+    inchar r0                   ; le teclado
     cmp r0, r1
-    jeq LoopEsperaEnter
+    jeq LoopEsperaEnter         ; aguarda input
 
-    loadn r1, #13
+    loadn r1, #13               ; codigo enter
     cmp r0, r1
-    jeq IniciarJogo
+    jeq IniciarJogo             ; inicia se enter
 
     jmp LoopEsperaEnter
 
@@ -77,10 +81,11 @@ IniciarJogo:
     jmp main
 
 ; ==================================================================
-; 2. MAIN
+; 2. main
 ; ==================================================================
+
 main:
-    ; --- 1. RESET GERAL ---
+    ; reseta variaveis
     loadn r0, #250
     store AlienPos, r0
     loadn r0, #1
@@ -92,50 +97,50 @@ main:
     store TiroStatus, r0
     loadn r0, #50
     store AlienSpeed, r0
+    loadn r0, #1140
     store PosJogador, r0
 
-    ; --- 2. SELETOR DE FUNDO ---
+    ; seleciona fundo inicial
     load r0, Level
     
-    ; Niveis 1-3 (Azul)
     loadn r1, #3
     cmp r0, r1
-    jle CarregaFundo1
+    jle CarregaFundo1      ; niveis 1 a 3
     
-    ; Niveis 4-6 (Verde)
     loadn r1, #6
     cmp r0, r1
-    jle CarregaFundo2
+    jle CarregaFundo2      ; niveis 4 a 6
     
-    ; Niveis 7+ (Vermelho)
-    jmp CarregaFundo3
+    jmp CarregaFundo3      ; niveis 7 a 9
 
 CarregaFundo1:
-    loadn r1, #nivel1-3
+    loadn r1, #nivel1-3 ; fundo para os niveis 1-3
     jmp DefineFundo
 CarregaFundo2:
-    loadn r1, #nivel4-6
+    loadn r1, #nivel4-6 ; fundo para os niveis 4-6
     jmp DefineFundo
 CarregaFundo3:
-    loadn r1, #nivel7-9
+    loadn r1, #nivel7-9 ; fundo para os niveis 7+
 
 DefineFundo:
     store PtrFundoAtual, r1
-    call DesenhaFundoCompleto  ; <--- DESENHA O FUNDO
-
-    ; --- 3. DESENHA RESTO (DEPOIS DO FUNDO!) ---
-    call ImprimePlacar         ; <--- AGORA O PLACAR APARECE
+    call DesenhaFundoCompleto   ; desenha fundo
+    call ImprimePlacar          ; desenha hud
 
     loadn r0, #1140
     loadn r6, #40
-    call DesenhaJogador
+    call DesenhaJogador         ; desenha jogador
     
     push r0
     load r0, AlienPos
-    call DesenhaAlien
+    call DesenhaAlien           ; desenha alien
     pop r0
 
     jmp LoopJogo
+
+; ==================================================================
+; 3. loop do jogo
+; ==================================================================
 
 LoopJogo:
     call ProcessaInput
@@ -146,7 +151,7 @@ LoopJogo:
     jmp LoopJogo
 
 ; ==================================================================
-; 3. LÓGICA
+; 4. logica
 ; ==================================================================
 
 ProcessaInput:
@@ -158,19 +163,19 @@ ProcessaInput:
     loadn r3, #255
     inchar r4
     cmp r4, r3
-    jeq FimInput
+    jeq FimInput           ; sai se nada apertado
 
     loadn r5, #'a'
     cmp r4, r5
-    jeq MoveEsq
+    jeq MoveEsq            ; move esquerda
 
     loadn r5, #'d'
     cmp r4, r5
-    jeq MoveDir
+    jeq MoveDir            ; move direita
 
     loadn r5, #' '
     cmp r4, r5
-    jeq TentaAtirar
+    jeq TentaAtirar        ; atira
 
     jmp FimInput
 
@@ -179,11 +184,11 @@ MoveEsq:
     mod r3, r0, r5
     loadn r5, #0
     cmp r3, r5
-    jeq FimInput
+    jeq FimInput           ; bloqueia parede esquerda
 
     call ApagaJogador  
     dec r0
-    store PosJogador, r0
+    store PosJogador, r0   ; atualiza posicao
     call DesenhaJogador 
     jmp FimInput
 
@@ -192,11 +197,11 @@ MoveDir:
     mod r3, r0, r5
     loadn r5, #38        
     cmp r3, r5
-    jeq FimInput
+    jeq FimInput           ; bloqueia parede direita
 
     call ApagaJogador  
     inc r0
-    store PosJogador, r0
+    store PosJogador, r0   ; atualiza posicao
     call DesenhaJogador
     jmp FimInput
 
@@ -204,14 +209,14 @@ TentaAtirar:
     load r3, TiroStatus
     loadn r5, #1
     cmp r3, r5
-    jeq FimInput
+    jeq FimInput           ; sai se ja tem tiro
 
     loadn r5, #40
     sub r5, r0, r5
-    inc r5
+    inc r5                 ; ajusta posicao do tiro
     store TiroPos, r5
     loadn r5, #1
-    store TiroStatus, r5
+    store TiroStatus, r5   ; ativa tiro
     jmp FimInput
 
 FimInput:
@@ -228,41 +233,40 @@ AtualizaTiro:
     push r5
     push r6
 
+    ; timer do tiro
     load r0, TiroTimer
     inc r0
     store TiroTimer, r0
     load r3, TiroSpeed
     cmp r0, r3
-    jle SaiTiro
+    jle SaiTiro            ; espera timer
     loadn r0, #0
     store TiroTimer, r0
 
     load r3, TiroStatus
     loadn r4, #0
     cmp r3, r4
-    jeq SaiTiro
+    jeq SaiTiro            ; sai se sem tiro
 
     load r0, TiroPos
     loadn r6, #40
 
     cmp r0, r6
-    jle ApagaTiro
+    jle ApagaTiro          ; apaga se chegou no topo
 
-    ; --- CORREÇÃO: USA RESTAURA PIXEL ---
-    call RestauraPixel  ; Apaga tiro velho restaurando fundo
+    call RestauraPixel     ; limpa rastro
 
-    sub r0, r0, r6
+    sub r0, r0, r6         ; move tiro
     
-    ; Desenha novo tiro
-    loadn r5, #11       ; Índice do seu projetil verde
+    loadn r5, #2827        ; desenha tiro amarelo
     outchar r5, r0
     store TiroPos, r0
     jmp SaiTiro
 
 ApagaTiro:
-    call RestauraPixel  ; Apaga tiro no teto restaurando fundo
+    call RestauraPixel
     loadn r4, #0
-    store TiroStatus, r4
+    store TiroStatus, r4   ; desativa tiro
 
 SaiTiro:
     pop r6
@@ -279,32 +283,36 @@ AtualizaAlien:
     push r3
     push r4
 
+    ; timer do alien
     load r0, AlienTimer
     inc r0
     store AlienTimer, r0
     load r1, AlienSpeed
     cmp r0, r1
-    jle SaiAtualizaAlien
+    jle SaiAtualizaAlien   ; espera timer
     loadn r0, #0
     store AlienTimer, r0
 
     load r0, AlienVivo
     loadn r1, #0
     cmp r0, r1
-    jeq SaiAtualizaAlien
+    jeq SaiAtualizaAlien   ; sai se morto
 
     load r0, AlienPos
     loadn r2, #40
 
-    call ApagaAlien    ; Apaga restaurando fundo
+    call ApagaAlien        ; limpa rastro
 
     mod r3, r0, r2
-    loadn r4, #38      
+    
+    ; parede direita
+    loadn r4, #38       
     cmp r3, r4
     jgr ViraParaEsquerda
     jeq ViraParaEsquerda
 
-    loadn r4, #0       
+    ; parede esquerda
+    loadn r4, #0        
     cmp r3, r4
     jle ViraParaDireita
     jeq ViraParaDireita
@@ -315,30 +323,30 @@ ViraParaEsquerda:
     loadn r1, #0
     store AlienDir, r1
     loadn r4, #40
-    add r0, r0, r4
+    add r0, r0, r4         ; desce linha
     jmp AplicaMovimento
 
 ViraParaDireita:
     loadn r1, #1
     store AlienDir, r1
     loadn r4, #40
-    add r0, r0, r4
+    add r0, r0, r4         ; desce linha
     jmp AplicaMovimento
 
 AplicaMovimento:
     loadn r4, #1100
     cmp r0, r4
-    jgr TeladeGameOver
+    jgr TelaDeGameOver     ; game over se desceu muito
 
     load r1, AlienDir
     loadn r2, #1
     cmp r1, r2
     jeq MoveAlienDir
-    dec r0
+    dec r0                 ; move esquerda
     jmp SalvaAlien
 
 MoveAlienDir:
-    inc r0
+    inc r0                 ; move direita
     jmp SalvaAlien
 
 SalvaAlien:
@@ -363,15 +371,16 @@ VerificaColisao:
     load r0, TiroStatus
     loadn r1, #0
     cmp r0, r1
-    jeq FimColisao
+    jeq FimColisao         ; sai se sem tiro
 
     load r0, AlienVivo
     cmp r0, r1
-    jeq FimColisao
+    jeq FimColisao         ; sai se alien morto
 
     load r0, TiroPos
     load r1, AlienPos
     
+    ; hitbox 4 blocos
     cmp r0, r1
     jeq MatarAlien
     loadn r2, #1
@@ -391,25 +400,29 @@ VerificaColisao:
 
 MatarAlien:
     mov r0, r1
-    call ApagaAlien
+    call ApagaAlien        ; remove alien
     
     loadn r2, #0
-    store TiroStatus, r2
+    store TiroStatus, r2   ; remove tiro
     load r0, TiroPos
-    call RestauraPixel  ; Apaga o tiro que acertou
+    call RestauraPixel
 
     load r0, Score
     inc r0
-    store Score, r0
+    store Score, r0        ; aumenta score
 
-    ; Aumenta Nivel e Velocidade
     load r0, Level
     inc r0
-    store Level, r0
+    store Level, r0        ; sobe nivel
+    
+    loadn r2, #10
+    cmp r0, r2
+    jeq TelaDeWin          ; vitoria no nivel 10
+
     call ImprimePlacar
+    call VerificaTrocaFundo ; atualiza fundo se mudou nivel
 
-    call VerificaTrocaFundo
-
+    ; aumenta dificuldade
     load r0, AlienSpeed
     loadn r2, #5
     sub r0, r0, r2
@@ -420,7 +433,7 @@ MatarAlien:
 
 MantemVelocidade:
     loadn r0, #250
-    store AlienPos, r0
+    store AlienPos, r0     ; respawn
     loadn r0, #1
     store AlienVivo, r0
     jmp FimColisao
@@ -433,7 +446,58 @@ FimColisao:
     pop r0
     rts
 
-TeladeGameOver:
+VerificaTrocaFundo:
+    push r0
+    push r1
+    push r2
+    
+    load r0, Level
+    
+    loadn r1, #4
+    cmp r0, r1
+    jle SetFundo1          ; 1-3 azul
+    
+    loadn r1, #7
+    cmp r0, r1
+    jle SetFundo2          ; 4-6 verde
+    
+    jmp SetFundo3          ; 7+ vermelho
+
+SetFundo1:
+    loadn r1, #nivel1-3
+    jmp AplicaFundo
+SetFundo2:
+    loadn r1, #nivel4-6
+    jmp AplicaFundo
+SetFundo3:
+    loadn r1, #nivel7-9
+
+AplicaFundo:
+    load r2, PtrFundoAtual
+    cmp r1, r2
+    jeq SaiTrocaFundo      ; evita redesenhar
+
+    store PtrFundoAtual, r1
+    call DesenhaFundoCompleto
+    call ImprimePlacar
+    
+    ; redesenha jogador apos limpar
+    push r0
+    load r0, PosJogador
+    call DesenhaJogador
+    pop r0
+    
+SaiTrocaFundo:
+    pop r2
+    pop r1
+    pop r0
+    rts
+
+; ==================================================================
+; 5. telas finais e auxiliares
+; ==================================================================
+
+TelaDeGameOver:
     call LimpaTela
     call printGameOverScreen
 LoopOpcaoTelaGameOverDados:
@@ -441,13 +505,45 @@ LoopOpcaoTelaGameOverDados:
     inchar r0
     cmp r0, r1
     jeq LoopOpcaoTelaGameOverDados
+    
     loadn r1, #'s'
     cmp r0, r1
     jeq ReiniciarJogo
+    loadn r1, #'S'
+    cmp r0, r1
+    jeq ReiniciarJogo
+    
     loadn r1, #'n'
     cmp r0, r1
     jeq IrParaTitulo
+    loadn r1, #'N'
+    cmp r0, r1
+    jeq IrParaTitulo
     jmp LoopOpcaoTelaGameOverDados
+
+TelaDeWin:
+    call LimpaTela
+    call printTelaWin
+LoopOpcaoWin:
+    loadn r1, #255
+    inchar r0
+    cmp r0, r1
+    jeq LoopOpcaoWin
+    
+    loadn r1, #'s'
+    cmp r0, r1
+    jeq ReiniciarJogo
+    loadn r1, #'S'
+    cmp r0, r1
+    jeq ReiniciarJogo
+    
+    loadn r1, #'n'
+    cmp r0, r1
+    jeq IrParaTitulo
+    loadn r1, #'N'
+    cmp r0, r1
+    jeq IrParaTitulo
+    jmp LoopOpcaoWin
 
 IrParaTitulo:
     jmp TelaDeTitulo
@@ -456,7 +552,7 @@ ReiniciarJogo:
     call LimpaTela
     jmp main
 
-; --- GRÁFICOS E AUXILIARES ---
+; --- funcoes graficas ---
 
 RestauraPixel:
     push r1
@@ -464,7 +560,7 @@ RestauraPixel:
     load r1, PtrFundoAtual
     add r1, r1, r0
     loadi r2, r1
-    outchar r2, r0
+    outchar r2, r0         ; restaura fundo
     pop r2
     pop r1
     rts
@@ -494,23 +590,14 @@ ApagaJogador:
     push r0
     push r1
     push r2
-    
-    ; Apaga Cima-Esq
     call RestauraPixel
-    
-    ; Apaga Cima-Dir
     inc r0
     call RestauraPixel
-    
-    ; Apaga Baixo-Esq
     loadn r2, #39
     add r0, r0, r2
     call RestauraPixel
-    
-    ; Apaga Baixo-Dir
     inc r0
     call RestauraPixel
-    
     pop r2
     pop r1
     pop r0
@@ -537,29 +624,20 @@ DesenhaJogador:
     push r0
     push r1
     push r2
-    
-    ; -- Parte 1: Cima Esq (Index 7) --
-    loadn r1, #2823    ; 2816 (Amarelo) + 7
+
+    loadn r1, #2823        ; indices amarelos
     outchar r1, r0
-    
-    ; -- Parte 2: Cima Dir (Index 8) --
-    inc r0             ; Vai pra direita
-    loadn r1, #2824    ; 2816 + 8
+    inc r0
+    loadn r1, #2824
     outchar r1, r0
-    
-    ; -- Parte 3: Baixo Esq (Index 9) --
-    ; Estamos na direita (pos + 1). 
-    ; Para ir para a linha de baixo na esquerda (pos + 40), somamos 39.
     loadn r2, #39
     add r0, r0, r2
-    loadn r1, #2826    ; 2816 + 9
+    loadn r1, #2826
     outchar r1, r0
-    
-    ; -- Parte 4: Baixo Dir (Index 10) --
-    inc r0             ; Vai pra direita
-    loadn r1, #2825    ; 2816 + 10
+    inc r0
+    loadn r1, #2825
     outchar r1, r0
-    
+
     pop r2
     pop r1
     pop r0
@@ -569,7 +647,7 @@ DesenhaAlien:
     push r0
     push r1
     push r2
-    loadn r1, #2307
+    loadn r1, #2307        ; indices vermelhos
     outchar r1, r0
     inc r0
     loadn r1, #2308
@@ -590,6 +668,14 @@ Delay:
     push r0
     push r1
     load r0, GameSpeed
+    load r1, TiroStatus
+    loadn r2, #1
+    cmp r1, r2
+    jne DelayLoop1         ; se nao atira, delay normal
+    loadn r2, #30
+    cmp r0, r2
+    jle DelayLoop1
+    sub r0, r0, r2         ; compensa lag do tiro
 DelayLoop1:
     loadn r1, #100
 DelayLoop2:
@@ -662,104 +748,81 @@ LimpaLoop:
     pop r2
     pop r1
     pop r0
-    rts
+    rtr
 
 printTelaInicioScreen:
-    push R0
-    push R1
-    push R2
-    push R3
-    loadn R0, #TelaInicioDados
-    loadn R1, #0
-    loadn R2, #1200
-printTelaInicioScreenLoop:
-    add R3,R0,R1
-    loadi R3, R3
-    outchar R3, R1
-    inc R1
-    cmp R1, R2
-    jne printTelaInicioScreenLoop
-    pop R3
-    pop R2
-    pop R1
-    pop R0
-    rts
-
-printGameOverScreen:
-    push R0
-    push R1
-    push R2
-    push R3
-    loadn R0, #TelaGameOverDados
-    loadn R1, #0
-    loadn R2, #1200
-printGameOverScreenLoop:
-    add R3,R0,R1
-    loadi R3, R3
-    outchar R3, R1
-    inc R1
-    cmp R1, R2
-    jne printGameOverScreenLoop
-    pop R3
-    pop R2
-    pop R1
-    pop R0
-    rts
-
-VerificaTrocaFundo:
     push r0
     push r1
     push r2
-    
-    load r0, Level
-    
-    ; --- Nível 1 a 3: Fundo 1 ---
-    loadn r1, #3
-    cmp r0, r1
-    jle SetFundo1      ; Se Nivel <= 3, Fundo 1
-    
-    ; --- Nível 4 a 6: Fundo 2 ---
-    loadn r1, #6
-    cmp r0, r1
-    jle SetFundo2      ; Se Nivel <= 6, Fundo 2
-    
-    ; --- Nível 7+: Fundo 3 ---
-    jmp SetFundo3
+    push r3
 
-SetFundo1:
-    loadn r1, #nivel1-3
-    jmp AplicaFundo
-SetFundo2:
-    loadn r1, #nivel4-6
-    jmp AplicaFundo
-SetFundo3:
-    loadn r1, #nivel7-9
+    loadn r0, #TelaInicioDados
+    loadn r1, #0
+    loadn r2, #1200
 
-AplicaFundo:
-    load r2, PtrFundoAtual
+printTelaInicioScreenLoop:
+    add r3,r0,r1
+    loadi r3, r3
+    outchar r3, r1
+    inc r1
     cmp r1, r2
-    jeq SaiTrocaFundo   
+    jne printTelaInicioScreenLoop
 
-    ; SE MUDOU DE FUNDO:
-    store PtrFundoAtual, r1
-    
-    ; 1. Desenha Fundo
-    call DesenhaFundoCompleto
-    
-    ; 2. Desenha Placar
-    call ImprimePlacar
-    
-    ; 3. REDESENHA O JOGADOR (A Correção!)
-    push r0             ; Salva r0 (que tem o Level)
-    load r0, PosJogador ; Carrega a posição real do jogador
-    call DesenhaJogador ; Desenha ele por cima do fundo novo
-    pop r0              ; Devolve r0 (Level)
-    
-SaiTrocaFundo:
+    pop r3
     pop r2
     pop r1
     pop r0
     rts
+
+printGameOverScreen:
+    push r0
+    push r1
+    push r2
+    push r3
+
+    loadn r0, #TelaGameOverDados
+    loadn r1, #0
+    loadn r2, #1200
+printGameOverScreenLoop:
+    add r3,r0,r1
+    loadi r3, r3
+    outchar r3, r1
+    inc r1
+    cmp r1, r2
+    jne printGameOverScreenLoop
+
+    pop r3
+    pop r2
+    pop r1
+    pop r0
+    rts
+
+printTelaWin:
+    push r0
+    push r1
+    push r2
+    push r3
+
+    loadn r0, #telawin
+    loadn r1, #0
+    loadn r2, #1200
+printTelaWinLoop:
+    add r3,r0,r1
+    loadi r3, r3
+    outchar r3, r1
+    inc r1
+    cmp r1, r2
+    jne printTelaWinLoop
+
+    pop r3
+    pop r2
+    pop r1
+    pop r0
+    rts
+
+; ==================================================================
+; 6. dados estaticos (telas e fundos)
+; ==================================================================
 
 TelaInicioDados : var #1200
   ;Linha 0
@@ -7080,3 +7143,1265 @@ nivel7-9 : var #1200
   static nivel7-9 + #1198, #127
   static nivel7-9 + #1199, #127
 
+; ========= TELA WIN =============
+
+telawin : var #1200
+  ;Linha 0
+  static telawin + #0, #3967
+  static telawin + #1, #3967
+  static telawin + #2, #3967
+  static telawin + #3, #3967
+  static telawin + #4, #3967
+  static telawin + #5, #3118
+  static telawin + #6, #3967
+  static telawin + #7, #3967
+  static telawin + #8, #3967
+  static telawin + #9, #3967
+  static telawin + #10, #3967
+  static telawin + #11, #3967
+  static telawin + #12, #3967
+  static telawin + #13, #3967
+  static telawin + #14, #3967
+  static telawin + #15, #3967
+  static telawin + #16, #3967
+  static telawin + #17, #3967
+  static telawin + #18, #3967
+  static telawin + #19, #3967
+  static telawin + #20, #3967
+  static telawin + #21, #3967
+  static telawin + #22, #3967
+  static telawin + #23, #3967
+  static telawin + #24, #3967
+  static telawin + #25, #3967
+  static telawin + #26, #3967
+  static telawin + #27, #3967
+  static telawin + #28, #3967
+  static telawin + #29, #3967
+  static telawin + #30, #3967
+  static telawin + #31, #3967
+  static telawin + #32, #3967
+  static telawin + #33, #3967
+  static telawin + #34, #3967
+  static telawin + #35, #3967
+  static telawin + #36, #3967
+  static telawin + #37, #3967
+  static telawin + #38, #3967
+  static telawin + #39, #3967
+
+  ;Linha 1
+  static telawin + #40, #3967
+  static telawin + #41, #3967
+  static telawin + #42, #3967
+  static telawin + #43, #3967
+  static telawin + #44, #3967
+  static telawin + #45, #3967
+  static telawin + #46, #3967
+  static telawin + #47, #3967
+  static telawin + #48, #3967
+  static telawin + #49, #3967
+  static telawin + #50, #2350
+  static telawin + #51, #3967
+  static telawin + #52, #3967
+  static telawin + #53, #3967
+  static telawin + #54, #3118
+  static telawin + #55, #2350
+  static telawin + #56, #3967
+  static telawin + #57, #3967
+  static telawin + #58, #3967
+  static telawin + #59, #3967
+  static telawin + #60, #3967
+  static telawin + #61, #1794
+  static telawin + #62, #3967
+  static telawin + #63, #3967
+  static telawin + #64, #3118
+  static telawin + #65, #3967
+  static telawin + #66, #3967
+  static telawin + #67, #3967
+  static telawin + #68, #1794
+  static telawin + #69, #3967
+  static telawin + #70, #3967
+  static telawin + #71, #3967
+  static telawin + #72, #3967
+  static telawin + #73, #3967
+  static telawin + #74, #3967
+  static telawin + #75, #3967
+  static telawin + #76, #2350
+  static telawin + #77, #3967
+  static telawin + #78, #3967
+  static telawin + #79, #3967
+
+  ;Linha 2
+  static telawin + #80, #3967
+  static telawin + #81, #3967
+  static telawin + #82, #1794
+  static telawin + #83, #3967
+  static telawin + #84, #3967
+  static telawin + #85, #1794
+  static telawin + #86, #3967
+  static telawin + #87, #3967
+  static telawin + #88, #3967
+  static telawin + #89, #3967
+  static telawin + #90, #3967
+  static telawin + #91, #3118
+  static telawin + #92, #3967
+  static telawin + #93, #3967
+  static telawin + #94, #3967
+  static telawin + #95, #3967
+  static telawin + #96, #3967
+  static telawin + #97, #3967
+  static telawin + #98, #3967
+  static telawin + #99, #3967
+  static telawin + #100, #2350
+  static telawin + #101, #3967
+  static telawin + #102, #3967
+  static telawin + #103, #3967
+  static telawin + #104, #3967
+  static telawin + #105, #3967
+  static telawin + #106, #3967
+  static telawin + #107, #3967
+  static telawin + #108, #3967
+  static telawin + #109, #3967
+  static telawin + #110, #2350
+  static telawin + #111, #3118
+  static telawin + #112, #3967
+  static telawin + #113, #1850
+  static telawin + #114, #3967
+  static telawin + #115, #3967
+  static telawin + #116, #3967
+  static telawin + #117, #3967
+  static telawin + #118, #3118
+  static telawin + #119, #3967
+
+  ;Linha 3
+  static telawin + #120, #3967
+  static telawin + #121, #3967
+  static telawin + #122, #3967
+  static telawin + #123, #3967
+  static telawin + #124, #3118
+  static telawin + #125, #3967
+  static telawin + #126, #3967
+  static telawin + #127, #3967
+  static telawin + #128, #3967
+  static telawin + #129, #3967
+  static telawin + #130, #3967
+  static telawin + #131, #3967
+  static telawin + #132, #3967
+  static telawin + #133, #3967
+  static telawin + #134, #3967
+  static telawin + #135, #3967
+  static telawin + #136, #1850
+  static telawin + #137, #3967
+  static telawin + #138, #3967
+  static telawin + #139, #3967
+  static telawin + #140, #3967
+  static telawin + #141, #3967
+  static telawin + #142, #3967
+  static telawin + #143, #3967
+  static telawin + #144, #3118
+  static telawin + #145, #3967
+  static telawin + #146, #3967
+  static telawin + #147, #3967
+  static telawin + #148, #3967
+  static telawin + #149, #3967
+  static telawin + #150, #3967
+  static telawin + #151, #3967
+  static telawin + #152, #3967
+  static telawin + #153, #3967
+  static telawin + #154, #3967
+  static telawin + #155, #3967
+  static telawin + #156, #3967
+  static telawin + #157, #3967
+  static telawin + #158, #3967
+  static telawin + #159, #3967
+
+  ;Linha 4
+  static telawin + #160, #3967
+  static telawin + #161, #3118
+  static telawin + #162, #3967
+  static telawin + #163, #3967
+  static telawin + #164, #3118
+  static telawin + #165, #3967
+  static telawin + #166, #3967
+  static telawin + #167, #3967
+  static telawin + #168, #3967
+  static telawin + #169, #3967
+  static telawin + #170, #3967
+  static telawin + #171, #3967
+  static telawin + #172, #3967
+  static telawin + #173, #3967
+  static telawin + #174, #3967
+  static telawin + #175, #3967
+  static telawin + #176, #3967
+  static telawin + #177, #3967
+  static telawin + #178, #3967
+  static telawin + #179, #3967
+  static telawin + #180, #3967
+  static telawin + #181, #3967
+  static telawin + #182, #3967
+  static telawin + #183, #3967
+  static telawin + #184, #3967
+  static telawin + #185, #3967
+  static telawin + #186, #3967
+  static telawin + #187, #3967
+  static telawin + #188, #3967
+  static telawin + #189, #3967
+  static telawin + #190, #3967
+  static telawin + #191, #3967
+  static telawin + #192, #3967
+  static telawin + #193, #3967
+  static telawin + #194, #3967
+  static telawin + #195, #3967
+  static telawin + #196, #1794
+  static telawin + #197, #3967
+  static telawin + #198, #3967
+  static telawin + #199, #3967
+
+  ;Linha 5
+  static telawin + #200, #3118
+  static telawin + #201, #3967
+  static telawin + #202, #3967
+  static telawin + #203, #3967
+  static telawin + #204, #3072
+  static telawin + #205, #3072
+  static telawin + #206, #3072
+  static telawin + #207, #3967
+  static telawin + #208, #3072
+  static telawin + #209, #3072
+  static telawin + #210, #3072
+  static telawin + #211, #3967
+  static telawin + #212, #3072
+  static telawin + #213, #3072
+  static telawin + #214, #3072
+  static telawin + #215, #3967
+  static telawin + #216, #3072
+  static telawin + #217, #3072
+  static telawin + #218, #3072
+  static telawin + #219, #3967
+  static telawin + #220, #3072
+  static telawin + #221, #3072
+  static telawin + #222, #3072
+  static telawin + #223, #3967
+  static telawin + #224, #3072
+  static telawin + #225, #3072
+  static telawin + #226, #3072
+  static telawin + #227, #3967
+  static telawin + #228, #3072
+  static telawin + #229, #3967
+  static telawin + #230, #3967
+  static telawin + #231, #3072
+  static telawin + #232, #3967
+  static telawin + #233, #3072
+  static telawin + #234, #3072
+  static telawin + #235, #3072
+  static telawin + #236, #3072
+  static telawin + #237, #3967
+  static telawin + #238, #3967
+  static telawin + #239, #3967
+
+  ;Linha 6
+  static telawin + #240, #3967
+  static telawin + #241, #3967
+  static telawin + #242, #3967
+  static telawin + #243, #3967
+  static telawin + #244, #3072
+  static telawin + #245, #3967
+  static telawin + #246, #3072
+  static telawin + #247, #3967
+  static telawin + #248, #3072
+  static telawin + #249, #3967
+  static telawin + #250, #3072
+  static telawin + #251, #3967
+  static telawin + #252, #3072
+  static telawin + #253, #3085
+  static telawin + #254, #3072
+  static telawin + #255, #3967
+  static telawin + #256, #3072
+  static telawin + #257, #3967
+  static telawin + #258, #3072
+  static telawin + #259, #3967
+  static telawin + #260, #3072
+  static telawin + #261, #3084
+  static telawin + #262, #3072
+  static telawin + #263, #3967
+  static telawin + #264, #3072
+  static telawin + #265, #3084
+  static telawin + #266, #3967
+  static telawin + #267, #3967
+  static telawin + #268, #3072
+  static telawin + #269, #3072
+  static telawin + #270, #3967
+  static telawin + #271, #3072
+  static telawin + #272, #3967
+  static telawin + #273, #3072
+  static telawin + #274, #3084
+  static telawin + #275, #3084
+  static telawin + #276, #3084
+  static telawin + #277, #3967
+  static telawin + #278, #3967
+  static telawin + #279, #3967
+
+  ;Linha 7
+  static telawin + #280, #3967
+  static telawin + #281, #3967
+  static telawin + #282, #3967
+  static telawin + #283, #3967
+  static telawin + #284, #3072
+  static telawin + #285, #3072
+  static telawin + #286, #3072
+  static telawin + #287, #3967
+  static telawin + #288, #3072
+  static telawin + #289, #3072
+  static telawin + #290, #3072
+  static telawin + #291, #3967
+  static telawin + #292, #3072
+  static telawin + #293, #3072
+  static telawin + #294, #3967
+  static telawin + #295, #3967
+  static telawin + #296, #3072
+  static telawin + #297, #3072
+  static telawin + #298, #3072
+  static telawin + #299, #3967
+  static telawin + #300, #3072
+  static telawin + #301, #3967
+  static telawin + #302, #3072
+  static telawin + #303, #3967
+  static telawin + #304, #3072
+  static telawin + #305, #3967
+  static telawin + #306, #3967
+  static telawin + #307, #3967
+  static telawin + #308, #3072
+  static telawin + #309, #3967
+  static telawin + #310, #3072
+  static telawin + #311, #3072
+  static telawin + #312, #3967
+  static telawin + #313, #3967
+  static telawin + #314, #3967
+  static telawin + #315, #3967
+  static telawin + #316, #3072
+  static telawin + #317, #3967
+  static telawin + #318, #3967
+  static telawin + #319, #3967
+
+  ;Linha 8
+  static telawin + #320, #3967
+  static telawin + #321, #3967
+  static telawin + #322, #3967
+  static telawin + #323, #3967
+  static telawin + #324, #3072
+  static telawin + #325, #3967
+  static telawin + #326, #3967
+  static telawin + #327, #3967
+  static telawin + #328, #3072
+  static telawin + #329, #3967
+  static telawin + #330, #3072
+  static telawin + #331, #3967
+  static telawin + #332, #3072
+  static telawin + #333, #3967
+  static telawin + #334, #3072
+  static telawin + #335, #3967
+  static telawin + #336, #3072
+  static telawin + #337, #3967
+  static telawin + #338, #3072
+  static telawin + #339, #3967
+  static telawin + #340, #3072
+  static telawin + #341, #3072
+  static telawin + #342, #3072
+  static telawin + #343, #3967
+  static telawin + #344, #3072
+  static telawin + #345, #3072
+  static telawin + #346, #3072
+  static telawin + #347, #3967
+  static telawin + #348, #3072
+  static telawin + #349, #3967
+  static telawin + #350, #3967
+  static telawin + #351, #3072
+  static telawin + #352, #3967
+  static telawin + #353, #3072
+  static telawin + #354, #3072
+  static telawin + #355, #3072
+  static telawin + #356, #3072
+  static telawin + #357, #3967
+  static telawin + #358, #3118
+  static telawin + #359, #3967
+
+  ;Linha 9
+  static telawin + #360, #3967
+  static telawin + #361, #3967
+  static telawin + #362, #3967
+  static telawin + #363, #3967
+  static telawin + #364, #3967
+  static telawin + #365, #3967
+  static telawin + #366, #3967
+  static telawin + #367, #3118
+  static telawin + #368, #3118
+  static telawin + #369, #3967
+  static telawin + #370, #3967
+  static telawin + #371, #3967
+  static telawin + #372, #3967
+  static telawin + #373, #3967
+  static telawin + #374, #3967
+  static telawin + #375, #3967
+  static telawin + #376, #3967
+  static telawin + #377, #3967
+  static telawin + #378, #3967
+  static telawin + #379, #3967
+  static telawin + #380, #3967
+  static telawin + #381, #3967
+  static telawin + #382, #3967
+  static telawin + #383, #3967
+  static telawin + #384, #3967
+  static telawin + #385, #3967
+  static telawin + #386, #3967
+  static telawin + #387, #3967
+  static telawin + #388, #3967
+  static telawin + #389, #3967
+  static telawin + #390, #3967
+  static telawin + #391, #3967
+  static telawin + #392, #3967
+  static telawin + #393, #3967
+  static telawin + #394, #3967
+  static telawin + #395, #3967
+  static telawin + #396, #3967
+  static telawin + #397, #3967
+  static telawin + #398, #3967
+  static telawin + #399, #3967
+
+  ;Linha 10
+  static telawin + #400, #3118
+  static telawin + #401, #3967
+  static telawin + #402, #3967
+  static telawin + #403, #3967
+  static telawin + #404, #2350
+  static telawin + #405, #2350
+  static telawin + #406, #3967
+  static telawin + #407, #3967
+  static telawin + #408, #3118
+  static telawin + #409, #3967
+  static telawin + #410, #3967
+  static telawin + #411, #3967
+  static telawin + #412, #3967
+  static telawin + #413, #3967
+  static telawin + #414, #3967
+  static telawin + #415, #3967
+  static telawin + #416, #3967
+  static telawin + #417, #3118
+  static telawin + #418, #3967
+  static telawin + #419, #3967
+  static telawin + #420, #3967
+  static telawin + #421, #3967
+  static telawin + #422, #3967
+  static telawin + #423, #1838
+  static telawin + #424, #3967
+  static telawin + #425, #3967
+  static telawin + #426, #3967
+  static telawin + #427, #3967
+  static telawin + #428, #3118
+  static telawin + #429, #3967
+  static telawin + #430, #3967
+  static telawin + #431, #3967
+  static telawin + #432, #1838
+  static telawin + #433, #3967
+  static telawin + #434, #3967
+  static telawin + #435, #3967
+  static telawin + #436, #3967
+  static telawin + #437, #3967
+  static telawin + #438, #3967
+  static telawin + #439, #3967
+
+  ;Linha 11
+  static telawin + #440, #3967
+  static telawin + #441, #2350
+  static telawin + #442, #1794
+  static telawin + #443, #3967
+  static telawin + #444, #3967
+  static telawin + #445, #3967
+  static telawin + #446, #3967
+  static telawin + #447, #1794
+  static telawin + #448, #3967
+  static telawin + #449, #3967
+  static telawin + #450, #3967
+  static telawin + #451, #3967
+  static telawin + #452, #3967
+  static telawin + #453, #3118
+  static telawin + #454, #3118
+  static telawin + #455, #3967
+  static telawin + #456, #3967
+  static telawin + #457, #3118
+  static telawin + #458, #3967
+  static telawin + #459, #3967
+  static telawin + #460, #3967
+  static telawin + #461, #3967
+  static telawin + #462, #3967
+  static telawin + #463, #3967
+  static telawin + #464, #3967
+  static telawin + #465, #3967
+  static telawin + #466, #3118
+  static telawin + #467, #3967
+  static telawin + #468, #3967
+  static telawin + #469, #3967
+  static telawin + #470, #3967
+  static telawin + #471, #3967
+  static telawin + #472, #3967
+  static telawin + #473, #3967
+  static telawin + #474, #3967
+  static telawin + #475, #3118
+  static telawin + #476, #3967
+  static telawin + #477, #2350
+  static telawin + #478, #3967
+  static telawin + #479, #3967
+
+  ;Linha 12
+  static telawin + #480, #2350
+  static telawin + #481, #3967
+  static telawin + #482, #3967
+  static telawin + #483, #3967
+  static telawin + #484, #3967
+  static telawin + #485, #3967
+  static telawin + #486, #3967
+  static telawin + #487, #3967
+  static telawin + #488, #3967
+  static telawin + #489, #3967
+  static telawin + #490, #2350
+  static telawin + #491, #1794
+  static telawin + #492, #3967
+  static telawin + #493, #3967
+  static telawin + #494, #3967
+  static telawin + #495, #3967
+  static telawin + #496, #3967
+  static telawin + #497, #3967
+  static telawin + #498, #3967
+  static telawin + #499, #3967
+  static telawin + #500, #3967
+  static telawin + #501, #3967
+  static telawin + #502, #3118
+  static telawin + #503, #3967
+  static telawin + #504, #2350
+  static telawin + #505, #3967
+  static telawin + #506, #3967
+  static telawin + #507, #1838
+  static telawin + #508, #3967
+  static telawin + #509, #3967
+  static telawin + #510, #3118
+  static telawin + #511, #3967
+  static telawin + #512, #3967
+  static telawin + #513, #3967
+  static telawin + #514, #3967
+  static telawin + #515, #3967
+  static telawin + #516, #3967
+  static telawin + #517, #3967
+  static telawin + #518, #3967
+  static telawin + #519, #3967
+
+  ;Linha 13
+  static telawin + #520, #3967
+  static telawin + #521, #3967
+  static telawin + #522, #3967
+  static telawin + #523, #3967
+  static telawin + #524, #3967
+  static telawin + #525, #3967
+  static telawin + #526, #3967
+  static telawin + #527, #3967
+  static telawin + #528, #3967
+  static telawin + #529, #3967
+  static telawin + #530, #3967
+  static telawin + #531, #3967
+  static telawin + #532, #3967
+  static telawin + #533, #3967
+  static telawin + #534, #3967
+  static telawin + #535, #3967
+  static telawin + #536, #3967
+  static telawin + #537, #3967
+  static telawin + #538, #3967
+  static telawin + #539, #3967
+  static telawin + #540, #1794
+  static telawin + #541, #3967
+  static telawin + #542, #3967
+  static telawin + #543, #3967
+  static telawin + #544, #3967
+  static telawin + #545, #3967
+  static telawin + #546, #3967
+  static telawin + #547, #3967
+  static telawin + #548, #2350
+  static telawin + #549, #3967
+  static telawin + #550, #3967
+  static telawin + #551, #3967
+  static telawin + #552, #3967
+  static telawin + #553, #3118
+  static telawin + #554, #3967
+  static telawin + #555, #3967
+  static telawin + #556, #3967
+  static telawin + #557, #3967
+  static telawin + #558, #3967
+  static telawin + #559, #3967
+
+  ;Linha 14
+  static telawin + #560, #3967
+  static telawin + #561, #3967
+  static telawin + #562, #3967
+  static telawin + #563, #3967
+  static telawin + #564, #3967
+  static telawin + #565, #3967
+  static telawin + #566, #3967
+  static telawin + #567, #3967
+  static telawin + #568, #3967
+  static telawin + #569, #3967
+  static telawin + #570, #3967
+  static telawin + #571, #3967
+  static telawin + #572, #3967
+  static telawin + #573, #3967
+  static telawin + #574, #3967
+  static telawin + #575, #3967
+  static telawin + #576, #3967
+  static telawin + #577, #1850
+  static telawin + #578, #3967
+  static telawin + #579, #2350
+  static telawin + #580, #3967
+  static telawin + #581, #3967
+  static telawin + #582, #2350
+  static telawin + #583, #3967
+  static telawin + #584, #3967
+  static telawin + #585, #3967
+  static telawin + #586, #3967
+  static telawin + #587, #3967
+  static telawin + #588, #3967
+  static telawin + #589, #3967
+  static telawin + #590, #3967
+  static telawin + #591, #3967
+  static telawin + #592, #3967
+  static telawin + #593, #3967
+  static telawin + #594, #3967
+  static telawin + #595, #3967
+  static telawin + #596, #1794
+  static telawin + #597, #3967
+  static telawin + #598, #3967
+  static telawin + #599, #3967
+
+  ;Linha 15
+  static telawin + #600, #3967
+  static telawin + #601, #3967
+  static telawin + #602, #3967
+  static telawin + #603, #3967
+  static telawin + #604, #3118
+  static telawin + #605, #3967
+  static telawin + #606, #3967
+  static telawin + #607, #3118
+  static telawin + #608, #3967
+  static telawin + #609, #3967
+  static telawin + #610, #3967
+  static telawin + #611, #3967
+  static telawin + #612, #3967
+  static telawin + #613, #3967
+  static telawin + #614, #3967
+  static telawin + #615, #3967
+  static telawin + #616, #3967
+  static telawin + #617, #3967
+  static telawin + #618, #3967
+  static telawin + #619, #3967
+  static telawin + #620, #3967
+  static telawin + #621, #3967
+  static telawin + #622, #2350
+  static telawin + #623, #3967
+  static telawin + #624, #3967
+  static telawin + #625, #3967
+  static telawin + #626, #1794
+  static telawin + #627, #3967
+  static telawin + #628, #3967
+  static telawin + #629, #3967
+  static telawin + #630, #3967
+  static telawin + #631, #3967
+  static telawin + #632, #3967
+  static telawin + #633, #1794
+  static telawin + #634, #3967
+  static telawin + #635, #3967
+  static telawin + #636, #3967
+  static telawin + #637, #3967
+  static telawin + #638, #3967
+  static telawin + #639, #3967
+
+  ;Linha 16
+  static telawin + #640, #3967
+  static telawin + #641, #3967
+  static telawin + #642, #3118
+  static telawin + #643, #3967
+  static telawin + #644, #3118
+  static telawin + #645, #3967
+  static telawin + #646, #3967
+  static telawin + #647, #3967
+  static telawin + #648, #3967
+  static telawin + #649, #3967
+  static telawin + #650, #3967
+  static telawin + #651, #3967
+  static telawin + #652, #3967
+  static telawin + #653, #1850
+  static telawin + #654, #3967
+  static telawin + #655, #3967
+  static telawin + #656, #3967
+  static telawin + #657, #3967
+  static telawin + #658, #2350
+  static telawin + #659, #3967
+  static telawin + #660, #3967
+  static telawin + #661, #3967
+  static telawin + #662, #3967
+  static telawin + #663, #3967
+  static telawin + #664, #3967
+  static telawin + #665, #3967
+  static telawin + #666, #1794
+  static telawin + #667, #3967
+  static telawin + #668, #3967
+  static telawin + #669, #3967
+  static telawin + #670, #3967
+  static telawin + #671, #3967
+  static telawin + #672, #3967
+  static telawin + #673, #3967
+  static telawin + #674, #3967
+  static telawin + #675, #3967
+  static telawin + #676, #3967
+  static telawin + #677, #2350
+  static telawin + #678, #3967
+  static telawin + #679, #3967
+
+  ;Linha 17
+  static telawin + #680, #3967
+  static telawin + #681, #3967
+  static telawin + #682, #3967
+  static telawin + #683, #3967
+  static telawin + #684, #3967
+  static telawin + #685, #3967
+  static telawin + #686, #3967
+  static telawin + #687, #3967
+  static telawin + #688, #3967
+  static telawin + #689, #3967
+  static telawin + #690, #3967
+  static telawin + #691, #3967
+  static telawin + #692, #3967
+  static telawin + #693, #3967
+  static telawin + #694, #3967
+  static telawin + #695, #3967
+  static telawin + #696, #2350
+  static telawin + #697, #3967
+  static telawin + #698, #3967
+  static telawin + #699, #3967
+  static telawin + #700, #3967
+  static telawin + #701, #3967
+  static telawin + #702, #2350
+  static telawin + #703, #1794
+  static telawin + #704, #3967
+  static telawin + #705, #3967
+  static telawin + #706, #3118
+  static telawin + #707, #3967
+  static telawin + #708, #1838
+  static telawin + #709, #3118
+  static telawin + #710, #3118
+  static telawin + #711, #3967
+  static telawin + #712, #3967
+  static telawin + #713, #3967
+  static telawin + #714, #3967
+  static telawin + #715, #3967
+  static telawin + #716, #3967
+  static telawin + #717, #3967
+  static telawin + #718, #3967
+  static telawin + #719, #3967
+
+  ;Linha 18
+  static telawin + #720, #3967
+  static telawin + #721, #3967
+  static telawin + #722, #3967
+  static telawin + #723, #3967
+  static telawin + #724, #3967
+  static telawin + #725, #1794
+  static telawin + #726, #3967
+  static telawin + #727, #3967
+  static telawin + #728, #3967
+  static telawin + #729, #2350
+  static telawin + #730, #3967
+  static telawin + #731, #3967
+  static telawin + #732, #3967
+  static telawin + #733, #3967
+  static telawin + #734, #3967
+  static telawin + #735, #3967
+  static telawin + #736, #2350
+  static telawin + #737, #2350
+  static telawin + #738, #3967
+  static telawin + #739, #3967
+  static telawin + #740, #3967
+  static telawin + #741, #3967
+  static telawin + #742, #3967
+  static telawin + #743, #3967
+  static telawin + #744, #3967
+  static telawin + #745, #3967
+  static telawin + #746, #3967
+  static telawin + #747, #3967
+  static telawin + #748, #3967
+  static telawin + #749, #3967
+  static telawin + #750, #3967
+  static telawin + #751, #3967
+  static telawin + #752, #2350
+  static telawin + #753, #3967
+  static telawin + #754, #3967
+  static telawin + #755, #3967
+  static telawin + #756, #1838
+  static telawin + #757, #3967
+  static telawin + #758, #3967
+  static telawin + #759, #3967
+
+  ;Linha 19
+  static telawin + #760, #3967
+  static telawin + #761, #3967
+  static telawin + #762, #3967
+  static telawin + #763, #3967
+  static telawin + #764, #3967
+  static telawin + #765, #3967
+  static telawin + #766, #3967
+  static telawin + #767, #3967
+  static telawin + #768, #3967
+  static telawin + #769, #3967
+  static telawin + #770, #1794
+  static telawin + #771, #3967
+  static telawin + #772, #3967
+  static telawin + #773, #3967
+  static telawin + #774, #3967
+  static telawin + #775, #3967
+  static telawin + #776, #3967
+  static telawin + #777, #2350
+  static telawin + #778, #3967
+  static telawin + #779, #3967
+  static telawin + #780, #3967
+  static telawin + #781, #3967
+  static telawin + #782, #3967
+  static telawin + #783, #3967
+  static telawin + #784, #3967
+  static telawin + #785, #3967
+  static telawin + #786, #2350
+  static telawin + #787, #3967
+  static telawin + #788, #3967
+  static telawin + #789, #3967
+  static telawin + #790, #3967
+  static telawin + #791, #3967
+  static telawin + #792, #3967
+  static telawin + #793, #3967
+  static telawin + #794, #3967
+  static telawin + #795, #3967
+  static telawin + #796, #3967
+  static telawin + #797, #3967
+  static telawin + #798, #3967
+  static telawin + #799, #3967
+
+  ;Linha 20
+  static telawin + #800, #3967
+  static telawin + #801, #3967
+  static telawin + #802, #3967
+  static telawin + #803, #3967
+  static telawin + #804, #3967
+  static telawin + #805, #3967
+  static telawin + #806, #3967
+  static telawin + #807, #3967
+  static telawin + #808, #3967
+  static telawin + #809, #3967
+  static telawin + #810, #3967
+  static telawin + #811, #3967
+  static telawin + #812, #3967
+  static telawin + #813, #3967
+  static telawin + #814, #3967
+  static telawin + #815, #3967
+  static telawin + #816, #3967
+  static telawin + #817, #3118
+  static telawin + #818, #3967
+  static telawin + #819, #3967
+  static telawin + #820, #3967
+  static telawin + #821, #3967
+  static telawin + #822, #3967
+  static telawin + #823, #3967
+  static telawin + #824, #3967
+  static telawin + #825, #3967
+  static telawin + #826, #3967
+  static telawin + #827, #2350
+  static telawin + #828, #3967
+  static telawin + #829, #3967
+  static telawin + #830, #3967
+  static telawin + #831, #3967
+  static telawin + #832, #1794
+  static telawin + #833, #3967
+  static telawin + #834, #3967
+  static telawin + #835, #3967
+  static telawin + #836, #3967
+  static telawin + #837, #3967
+  static telawin + #838, #3967
+  static telawin + #839, #3967
+
+  ;Linha 21
+  static telawin + #840, #3967
+  static telawin + #841, #3967
+  static telawin + #842, #3118
+  static telawin + #843, #3967
+  static telawin + #844, #3967
+  static telawin + #845, #3967
+  static telawin + #846, #2350
+  static telawin + #847, #2890
+  static telawin + #848, #2895
+  static telawin + #849, #2887
+  static telawin + #850, #2881
+  static telawin + #851, #2898
+  static telawin + #852, #3967
+  static telawin + #853, #2894
+  static telawin + #854, #2895
+  static telawin + #855, #2902
+  static telawin + #856, #2881
+  static telawin + #857, #2893
+  static telawin + #858, #2885
+  static telawin + #859, #2894
+  static telawin + #860, #2900
+  static telawin + #861, #2885
+  static telawin + #862, #2879
+  static telawin + #863, #3967
+  static telawin + #864, #2907
+  static telawin + #865, #2899
+  static telawin + #866, #2909
+  static telawin + #867, #3967
+  static telawin + #868, #2874
+  static telawin + #869, #3967
+  static telawin + #870, #2907
+  static telawin + #871, #2894
+  static telawin + #872, #2909
+  static telawin + #873, #3967
+  static telawin + #874, #3967
+  static telawin + #875, #3967
+  static telawin + #876, #3967
+  static telawin + #877, #3967
+  static telawin + #878, #3967
+  static telawin + #879, #3967
+
+  ;Linha 22
+  static telawin + #880, #3967
+  static telawin + #881, #3967
+  static telawin + #882, #3967
+  static telawin + #883, #3967
+  static telawin + #884, #3967
+  static telawin + #885, #3967
+  static telawin + #886, #3967
+  static telawin + #887, #3967
+  static telawin + #888, #3967
+  static telawin + #889, #3967
+  static telawin + #890, #3967
+  static telawin + #891, #3967
+  static telawin + #892, #3967
+  static telawin + #893, #3967
+  static telawin + #894, #3967
+  static telawin + #895, #3118
+  static telawin + #896, #3967
+  static telawin + #897, #3967
+  static telawin + #898, #3967
+  static telawin + #899, #3967
+  static telawin + #900, #3967
+  static telawin + #901, #3118
+  static telawin + #902, #3967
+  static telawin + #903, #3967
+  static telawin + #904, #3967
+  static telawin + #905, #3967
+  static telawin + #906, #3967
+  static telawin + #907, #1794
+  static telawin + #908, #3967
+  static telawin + #909, #3967
+  static telawin + #910, #3967
+  static telawin + #911, #3967
+  static telawin + #912, #3967
+  static telawin + #913, #3967
+  static telawin + #914, #3967
+  static telawin + #915, #3967
+  static telawin + #916, #3967
+  static telawin + #917, #3967
+  static telawin + #918, #3967
+  static telawin + #919, #3967
+
+  ;Linha 23
+  static telawin + #920, #3967
+  static telawin + #921, #3967
+  static telawin + #922, #3967
+  static telawin + #923, #3967
+  static telawin + #924, #3967
+  static telawin + #925, #3967
+  static telawin + #926, #3967
+  static telawin + #927, #3118
+  static telawin + #928, #3967
+  static telawin + #929, #3967
+  static telawin + #930, #3967
+  static telawin + #931, #3967
+  static telawin + #932, #3967
+  static telawin + #933, #3967
+  static telawin + #934, #3967
+  static telawin + #935, #3967
+  static telawin + #936, #3967
+  static telawin + #937, #3967
+  static telawin + #938, #1794
+  static telawin + #939, #3967
+  static telawin + #940, #3967
+  static telawin + #941, #3118
+  static telawin + #942, #3967
+  static telawin + #943, #3967
+  static telawin + #944, #3967
+  static telawin + #945, #3967
+  static telawin + #946, #3967
+  static telawin + #947, #3967
+  static telawin + #948, #3967
+  static telawin + #949, #3967
+  static telawin + #950, #3967
+  static telawin + #951, #3967
+  static telawin + #952, #3967
+  static telawin + #953, #3967
+  static telawin + #954, #3967
+  static telawin + #955, #3967
+  static telawin + #956, #3967
+  static telawin + #957, #1838
+  static telawin + #958, #3967
+  static telawin + #959, #3967
+
+  ;Linha 24
+  static telawin + #960, #3967
+  static telawin + #961, #3967
+  static telawin + #962, #3967
+  static telawin + #963, #3967
+  static telawin + #964, #3967
+  static telawin + #965, #2350
+  static telawin + #966, #3967
+  static telawin + #967, #3967
+  static telawin + #968, #3967
+  static telawin + #969, #3967
+  static telawin + #970, #3967
+  static telawin + #971, #3967
+  static telawin + #972, #3967
+  static telawin + #973, #1794
+  static telawin + #974, #3967
+  static telawin + #975, #3967
+  static telawin + #976, #3967
+  static telawin + #977, #3967
+  static telawin + #978, #3967
+  static telawin + #979, #2350
+  static telawin + #980, #2350
+  static telawin + #981, #3967
+  static telawin + #982, #3967
+  static telawin + #983, #3967
+  static telawin + #984, #3967
+  static telawin + #985, #1794
+  static telawin + #986, #3967
+  static telawin + #987, #3967
+  static telawin + #988, #3967
+  static telawin + #989, #3967
+  static telawin + #990, #3967
+  static telawin + #991, #3967
+  static telawin + #992, #1794
+  static telawin + #993, #3967
+  static telawin + #994, #3967
+  static telawin + #995, #3967
+  static telawin + #996, #3967
+  static telawin + #997, #3967
+  static telawin + #998, #3967
+  static telawin + #999, #3967
+
+  ;Linha 25
+  static telawin + #1000, #3967
+  static telawin + #1001, #3967
+  static telawin + #1002, #3967
+  static telawin + #1003, #3967
+  static telawin + #1004, #3967
+  static telawin + #1005, #3967
+  static telawin + #1006, #3967
+  static telawin + #1007, #3967
+  static telawin + #1008, #3967
+  static telawin + #1009, #3967
+  static telawin + #1010, #3967
+  static telawin + #1011, #3967
+  static telawin + #1012, #3967
+  static telawin + #1013, #3967
+  static telawin + #1014, #3967
+  static telawin + #1015, #3967
+  static telawin + #1016, #3967
+  static telawin + #1017, #3967
+  static telawin + #1018, #3967
+  static telawin + #1019, #3967
+  static telawin + #1020, #3967
+  static telawin + #1021, #3967
+  static telawin + #1022, #3967
+  static telawin + #1023, #3967
+  static telawin + #1024, #3967
+  static telawin + #1025, #3967
+  static telawin + #1026, #3967
+  static telawin + #1027, #3967
+  static telawin + #1028, #3967
+  static telawin + #1029, #3967
+  static telawin + #1030, #3967
+  static telawin + #1031, #3967
+  static telawin + #1032, #3967
+  static telawin + #1033, #3967
+  static telawin + #1034, #3118
+  static telawin + #1035, #3967
+  static telawin + #1036, #3967
+  static telawin + #1037, #1794
+  static telawin + #1038, #3967
+  static telawin + #1039, #3967
+
+  ;Linha 26
+  static telawin + #1040, #3967
+  static telawin + #1041, #3967
+  static telawin + #1042, #1794
+  static telawin + #1043, #3967
+  static telawin + #1044, #3967
+  static telawin + #1045, #3967
+  static telawin + #1046, #3967
+  static telawin + #1047, #3967
+  static telawin + #1048, #3967
+  static telawin + #1049, #3967
+  static telawin + #1050, #3967
+  static telawin + #1051, #3118
+  static telawin + #1052, #2350
+  static telawin + #1053, #3967
+  static telawin + #1054, #3967
+  static telawin + #1055, #3967
+  static telawin + #1056, #3967
+  static telawin + #1057, #3967
+  static telawin + #1058, #3967
+  static telawin + #1059, #2350
+  static telawin + #1060, #3967
+  static telawin + #1061, #3967
+  static telawin + #1062, #3967
+  static telawin + #1063, #3967
+  static telawin + #1064, #3967
+  static telawin + #1065, #3967
+  static telawin + #1066, #3967
+  static telawin + #1067, #3967
+  static telawin + #1068, #3967
+  static telawin + #1069, #3967
+  static telawin + #1070, #3967
+  static telawin + #1071, #1838
+  static telawin + #1072, #3967
+  static telawin + #1073, #3967
+  static telawin + #1074, #3967
+  static telawin + #1075, #3967
+  static telawin + #1076, #1838
+  static telawin + #1077, #3967
+  static telawin + #1078, #3967
+  static telawin + #1079, #3967
+
+  ;Linha 27
+  static telawin + #1080, #3967
+  static telawin + #1081, #3967
+  static telawin + #1082, #3967
+  static telawin + #1083, #3967
+  static telawin + #1084, #3967
+  static telawin + #1085, #3967
+  static telawin + #1086, #3967
+  static telawin + #1087, #3967
+  static telawin + #1088, #1794
+  static telawin + #1089, #3967
+  static telawin + #1090, #3967
+  static telawin + #1091, #3967
+  static telawin + #1092, #3967
+  static telawin + #1093, #3967
+  static telawin + #1094, #3967
+  static telawin + #1095, #3967
+  static telawin + #1096, #3967
+  static telawin + #1097, #3967
+  static telawin + #1098, #3967
+  static telawin + #1099, #3967
+  static telawin + #1100, #3967
+  static telawin + #1101, #3118
+  static telawin + #1102, #3967
+  static telawin + #1103, #3967
+  static telawin + #1104, #3967
+  static telawin + #1105, #2350
+  static telawin + #1106, #3967
+  static telawin + #1107, #3967
+  static telawin + #1108, #3967
+  static telawin + #1109, #3118
+  static telawin + #1110, #3967
+  static telawin + #1111, #3967
+  static telawin + #1112, #3967
+  static telawin + #1113, #3967
+  static telawin + #1114, #3967
+  static telawin + #1115, #3967
+  static telawin + #1116, #3967
+  static telawin + #1117, #3967
+  static telawin + #1118, #3967
+  static telawin + #1119, #3967
+
+  ;Linha 28
+  static telawin + #1120, #3967
+  static telawin + #1121, #3967
+  static telawin + #1122, #3967
+  static telawin + #1123, #3967
+  static telawin + #1124, #3967
+  static telawin + #1125, #3967
+  static telawin + #1126, #3967
+  static telawin + #1127, #3967
+  static telawin + #1128, #3967
+  static telawin + #1129, #3967
+  static telawin + #1130, #3967
+  static telawin + #1131, #3967
+  static telawin + #1132, #3967
+  static telawin + #1133, #3967
+  static telawin + #1134, #3967
+  static telawin + #1135, #3967
+  static telawin + #1136, #3967
+  static telawin + #1137, #3118
+  static telawin + #1138, #3967
+  static telawin + #1139, #3967
+  static telawin + #1140, #3967
+  static telawin + #1141, #3967
+  static telawin + #1142, #3967
+  static telawin + #1143, #3967
+  static telawin + #1144, #3967
+  static telawin + #1145, #2350
+  static telawin + #1146, #3967
+  static telawin + #1147, #3967
+  static telawin + #1148, #3967
+  static telawin + #1149, #3967
+  static telawin + #1150, #3967
+  static telawin + #1151, #3967
+  static telawin + #1152, #3967
+  static telawin + #1153, #3967
+  static telawin + #1154, #3967
+  static telawin + #1155, #3967
+  static telawin + #1156, #3967
+  static telawin + #1157, #3967
+  static telawin + #1158, #3967
+  static telawin + #1159, #3967
+
+  ;Linha 29
+  static telawin + #1160, #3967
+  static telawin + #1161, #3967
+  static telawin + #1162, #3967
+  static telawin + #1163, #3967
+  static telawin + #1164, #3967
+  static telawin + #1165, #3967
+  static telawin + #1166, #3967
+  static telawin + #1167, #3967
+  static telawin + #1168, #3967
+  static telawin + #1169, #3967
+  static telawin + #1170, #3967
+  static telawin + #1171, #3967
+  static telawin + #1172, #3967
+  static telawin + #1173, #3967
+  static telawin + #1174, #3967
+  static telawin + #1175, #3967
+  static telawin + #1176, #3967
+  static telawin + #1177, #3967
+  static telawin + #1178, #3967
+  static telawin + #1179, #3967
+  static telawin + #1180, #3967
+  static telawin + #1181, #3967
+  static telawin + #1182, #3967
+  static telawin + #1183, #3967
+  static telawin + #1184, #3967
+  static telawin + #1185, #3967
+  static telawin + #1186, #3967
+  static telawin + #1187, #3967
+  static telawin + #1188, #3967
+  static telawin + #1189, #3967
+  static telawin + #1190, #3967
+  static telawin + #1191, #3967
+  static telawin + #1192, #3967
+  static telawin + #1193, #3967
+  static telawin + #1194, #3967
+  static telawin + #1195, #3967
+  static telawin + #1196, #3967
+  static telawin + #1197, #3967
+  static telawin + #1198, #3967
+  static telawin + #1199, #3967
