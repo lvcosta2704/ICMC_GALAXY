@@ -104,8 +104,9 @@ main:
     load r0, Level
     
     loadn r1, #3
-    cmp r0, r1
-    jle CarregaFundo1      ; niveis 1 a 3
+    cmp r0, r1			; sempre realiza eessa comparacao para ver que nivel o 
+    					; o jogador esta
+    jle CarregaFundo1   ; niveis 1 a 3
     
     loadn r1, #6
     cmp r0, r1
@@ -127,7 +128,7 @@ DefineFundo:
     call DesenhaFundoCompleto   ; desenha fundo
     call ImprimePlacar          ; desenha hud
 
-    loadn r0, #1140
+    loadn r0, #1140				; coloca as posicoes na tela que serao usadas
     loadn r6, #40
     call DesenhaJogador         ; desenha jogador
     
@@ -143,11 +144,11 @@ DefineFundo:
 ; ==================================================================
 
 LoopJogo:
-    call ProcessaInput
-    call AtualizaTiro
-    call AtualizaAlien
-    call VerificaColisao
-    call Delay
+    call ProcessaInput  ; funcao resposavel por ler o teclado e processar
+    call AtualizaTiro	; funcao que faz o tiro andar 
+    call AtualizaAlien 	; funcao que faz o alien se mover
+    call VerificaColisao 	; funcao que verifica se o tiro pegou no alien
+    call Delay 	; funcao delay que faz o jogo rodar de forma melhor
     jmp LoopJogo
 
 ; ==================================================================
@@ -173,7 +174,7 @@ ProcessaInput:
     cmp r4, r5
     jeq MoveDir            ; move direita
 
-    loadn r5, #' '
+    loadn r5, #' '		   ; ESPAÇO atira
     cmp r4, r5
     jeq TentaAtirar        ; atira
 
@@ -181,7 +182,8 @@ ProcessaInput:
 
 MoveEsq:
     loadn r5, #40
-    mod r3, r0, r5
+    mod r3, r0, r5		   ; utiliza a funcao mod para saber se chegou no final
+    					   ; da tela
     loadn r5, #0
     cmp r3, r5
     jeq FimInput           ; bloqueia parede esquerda
@@ -194,8 +196,8 @@ MoveEsq:
 
 MoveDir:
     loadn r5, #40
-    mod r3, r0, r5
-    loadn r5, #38        
+    mod r3, r0, r5         ; mesma coisa aqui para a direita
+    loadn r5, #38          ; usa se 38 aqui pois a nave do jogador é 2x2
     cmp r3, r5
     jeq FimInput           ; bloqueia parede direita
 
@@ -206,13 +208,13 @@ MoveDir:
     jmp FimInput
 
 TentaAtirar:
-    load r3, TiroStatus
+    load r3, TiroStatus    ; TiroStatus guarda o estado do tiro, se saiu ou nao
     loadn r5, #1
     cmp r3, r5
     jeq FimInput           ; sai se ja tem tiro
 
-    loadn r5, #40
-    sub r5, r0, r5
+    loadn r5, #40		   ; utiliza o r5 agora para por 40 para o tiro subir 
+    sub r5, r0, r5		   ; subtrai 40 da pos que esta no r0 para o tiro subir
     inc r5                 ; ajusta posicao do tiro
     store TiroPos, r5
     loadn r5, #1
@@ -234,7 +236,7 @@ AtualizaTiro:
     push r6
 
     ; timer do tiro
-    load r0, TiroTimer
+    load r0, TiroTimer	   ; coloca o timer que controla o clock do tiro no r0
     inc r0
     store TiroTimer, r0
     load r3, TiroSpeed
@@ -244,7 +246,7 @@ AtualizaTiro:
     store TiroTimer, r0
 
     load r3, TiroStatus
-    loadn r4, #0
+    loadn r4, #0 
     cmp r3, r4
     jeq SaiTiro            ; sai se sem tiro
 
@@ -254,7 +256,7 @@ AtualizaTiro:
     cmp r0, r6
     jle ApagaTiro          ; apaga se chegou no topo
 
-    call RestauraPixel     ; limpa rastro
+    call RestauraPixel     ; limpa rastro do tira passando em cima do CENARIO
 
     sub r0, r0, r6         ; move tiro
     
@@ -263,6 +265,7 @@ AtualizaTiro:
     store TiroPos, r0
     jmp SaiTiro
 
+; funcao ApagaTiro restaura os pixeis que estavam atras do tiro e depois desativa ele na variavel
 ApagaTiro:
     call RestauraPixel
     loadn r4, #0
@@ -283,7 +286,10 @@ AtualizaAlien:
     push r3
     push r4
 
+    ; mesma logica de timers e speed funciona com o alien, para ajustar a sua velocidade 
+    ; em comparacao com o resto do cenario
     ; timer do alien
+
     load r0, AlienTimer
     inc r0
     store AlienTimer, r0
@@ -304,7 +310,7 @@ AtualizaAlien:
     call ApagaAlien        ; limpa rastro
 
     mod r3, r0, r2
-    
+    ; essa parte fica reservada a quando o alien bate nas paredes e tem que se mover para o lado contrario
     ; parede direita
     loadn r4, #38       
     cmp r3, r4
@@ -320,28 +326,29 @@ AtualizaAlien:
     jmp AplicaMovimento
 
 ViraParaEsquerda:
-    loadn r1, #0
+    loadn r1, #0 	; indo para a esquerda é 0
     store AlienDir, r1
     loadn r4, #40
     add r0, r0, r4         ; desce linha
     jmp AplicaMovimento
 
 ViraParaDireita:
-    loadn r1, #1
+    loadn r1, #1 	; indo para a direita é 1
     store AlienDir, r1
     loadn r4, #40
     add r0, r0, r4         ; desce linha
     jmp AplicaMovimento
 
 AplicaMovimento:
-    loadn r4, #1100
+    loadn r4, #1100 	   ; aqui checa se o jogo acabou, ou seja o alien chegou ate o personagem
     cmp r0, r4
     jgr TelaDeGameOver     ; game over se desceu muito
 
-    load r1, AlienDir
+    load r1, AlienDir 
     loadn r2, #1
     cmp r1, r2
-    jeq MoveAlienDir
+    jeq MoveAlienDir 	   ; se nao for igual e move o alien para a esquerda, se for igual 
+    					   ; pula para MoveAlienDir que move o alien para a direita
     dec r0                 ; move esquerda
     jmp SalvaAlien
 
@@ -369,7 +376,7 @@ VerificaColisao:
     push r4
 
     load r0, TiroStatus
-    loadn r1, #0
+    loadn r1, #0 		   ; carrega r1 com 0
     cmp r0, r1
     jeq FimColisao         ; sai se sem tiro
 
@@ -379,7 +386,7 @@ VerificaColisao:
 
     load r0, TiroPos
     load r1, AlienPos
-    
+    ; aqui ha varias verificacoes para ver se o tiro realmente atingiu o alien de 2x2 pixeis
     ; hitbox 4 blocos
     cmp r0, r1
     jeq MatarAlien
@@ -427,7 +434,7 @@ MatarAlien:
     loadn r2, #5
     sub r0, r0, r2
     loadn r2, #2
-    cmp r0, r2
+    cmp r0, r2 		; aqui so checa por precaucao se a velocidade começou a diminuir muito (aumentar)
     jle MantemVelocidade
     store AlienSpeed, r0
 
@@ -473,13 +480,13 @@ SetFundo3:
     loadn r1, #nivel7-9
 
 AplicaFundo:
-    load r2, PtrFundoAtual
-    cmp r1, r2
+    load r2, PtrFundoAtual ; endereço da tela de fundo 
+    cmp r1, r2			   ; se for igual nao precisa trocar de fundo
     jeq SaiTrocaFundo      ; evita redesenhar
 
     store PtrFundoAtual, r1
-    call DesenhaFundoCompleto
-    call ImprimePlacar
+    call DesenhaFundoCompleto    ; desenha o fundo novo
+    call ImprimePlacar			 ; desenha o placar novamente
     
     ; redesenha jogador apos limpar
     push r0
@@ -498,21 +505,28 @@ SaiTrocaFundo:
 ; ==================================================================
 
 TelaDeGameOver:
-    call LimpaTela
-    call printGameOverScreen
+    call LimpaTela		; limpa a tela para mostrar a proxima tela de game over
+    call printGameOverScreen 		; imprime a tela de game over
+
+; essas funcoes de telas de fundo foram a maioria tiradas 
+; do software de criar tela em Assembly em Python
+
+; essa funcao é resposavel por processar os comandos dados pelo usuario ao chegar na tela de game over
 LoopOpcaoTelaGameOverDados:
-    loadn r1, #255
+    loadn r1, #255  ; nada clicado volta para o loop
     inchar r0
     cmp r0, r1
     jeq LoopOpcaoTelaGameOverDados
     
+    ; checa se foi clicado o S ou o s para reiniciar o jogo
     loadn r1, #'s'
     cmp r0, r1
-    jeq ReiniciarJogo
+    jeq ReiniciarJogo  ; reseta as variaveis e reinicia o jogo do nivel 1
     loadn r1, #'S'
     cmp r0, r1
     jeq ReiniciarJogo
-    
+
+    ; checa se foi clicado o N ou n para ir para o titulo do jogo
     loadn r1, #'n'
     cmp r0, r1
     jeq IrParaTitulo
@@ -524,19 +538,22 @@ LoopOpcaoTelaGameOverDados:
 TelaDeWin:
     call LimpaTela
     call printTelaWin
+; funcao que processa as respostas do usuario quando o jogo é finalizado e ganhado
 LoopOpcaoWin:
-    loadn r1, #255
+    loadn r1, #255 ; se nao clica nada ele volta pro loop denovo
     inchar r0
     cmp r0, r1
     jeq LoopOpcaoWin
-    
+
+    ; chega S ou s para reiniciar o jogo da mesma forma
     loadn r1, #'s'
     cmp r0, r1
     jeq ReiniciarJogo
     loadn r1, #'S'
     cmp r0, r1
     jeq ReiniciarJogo
-    
+
+    ; checa N ou n para ir para o titulo
     loadn r1, #'n'
     cmp r0, r1
     jeq IrParaTitulo
@@ -548,20 +565,27 @@ LoopOpcaoWin:
 IrParaTitulo:
     jmp TelaDeTitulo
 
+; funcao responsavel por rodar o jogo denovo 
 ReiniciarJogo:
     call LimpaTela
     jmp main
 
-; --- funcoes graficas ---
+; ==================================================================
+; 6. funcoes gráficas
+; ==================================================================
 
+; funcao RestauraPixel fica responsavel por regenerar por onde passa os personagens do jogo
+; visto que para andar é preciso apagar, mover e desenhar
 RestauraPixel:
     push r1
     push r2
+
     load r1, PtrFundoAtual
     add r1, r1, r0
     loadi r2, r1
     outchar r2, r0         ; restaura fundo
     pop r2
+
     pop r1
     rts
 
@@ -570,26 +594,31 @@ DesenhaFundoCompleto:
     push r1
     push r2
     push r3
+
     load r1, PtrFundoAtual
     loadn r0, #0
     loadn r2, #1200
 LoopDesenhaFundo:
-    loadi r3, r1
+    loadi r3, r1  ; aqui funciona como se fosse um vetor de pixeis, ele vai avançando e imprimindo
     outchar r3, r0
     inc r0
     inc r1
-    dec r2
-    jnz LoopDesenhaFundo
+    dec r2  ; enquanto a tela nao acabou, ou seja de 1200 foi pra 0 ele nao para de imprimir a tela
+    jnz LoopDesenhaFundo  ; se nao é 0 entao entra no loop denovo
+
     pop r3
     pop r2
     pop r1
     pop r0
     rts
 
+; funcao ApagaJogador e ApagaAlien sempre que move o jogador/alien é chamada, e assim tambem é chamada
+; a RestauraPixel para nao apagar toda a tela do jogo por onde anda
 ApagaJogador:
     push r0
     push r1
     push r2
+
     call RestauraPixel
     inc r0
     call RestauraPixel
@@ -598,6 +627,7 @@ ApagaJogador:
     call RestauraPixel
     inc r0
     call RestauraPixel
+
     pop r2
     pop r1
     pop r0
@@ -607,6 +637,7 @@ ApagaAlien:
     push r0
     push r1
     push r2
+
     call RestauraPixel
     inc r0
     call RestauraPixel
@@ -615,16 +646,22 @@ ApagaAlien:
     call RestauraPixel
     inc r0
     call RestauraPixel
+
     pop r2
     pop r1
     pop r0
     rts
 
+; funcao DesenhaJogador faz a funcao de desenhar os 4 caracteres
+; criados em Python no Criador de Telas em Assembly
+; funciona da mesma forma que a funcao de DesenhaAlien
+; somente as cores mudam, personagem em AMARELO e alien em VERMELHO
 DesenhaJogador:
     push r0
     push r1
     push r2
 
+    ; sempre carrega o r1 com o caractere da vez a ser imprimido
     loadn r1, #2823        ; indices amarelos
     outchar r1, r0
     inc r0
@@ -647,6 +684,8 @@ DesenhaAlien:
     push r0
     push r1
     push r2
+
+    ; sempre carrega o r1 com o caractere a ser imprimido
     loadn r1, #2307        ; indices vermelhos
     outchar r1, r0
     inc r0
@@ -659,14 +698,18 @@ DesenhaAlien:
     inc r0
     loadn r1, #2310
     outchar r1, r0
+
     pop r2
     pop r1
     pop r0
     rts
 
+; funcao Delay que é responsavel pelo jogo rodar de forma fluida e nao tao 
+; rapida quanto o processar processa as informacoes
 Delay: 
     push r0
     push r1
+
     load r0, GameSpeed
     load r1, TiroStatus
     loadn r2, #1
@@ -683,26 +726,30 @@ DelayLoop2:
     jnz DelayLoop2
     dec r0
     jnz DelayLoop1
+
     pop r1
     pop r0
     rts
-
+; a funcao ImprimePlacar usa uma variavel para sempre imprimir a palavra "level" e tambem 
+; uma variavel Level que guarda o numero do level que o usuario esta
 ImprimePlacar:
     push r0
     push r1
     push r2
     push r3
+
     loadn r0, #0
-    loadn r1, #mensagemlevel
+    loadn r1, #mensagemlevel   ; aqui esta a mensagem que escreve "level"
     loadn r2, #512
     call ImprimeString
     loadn r0, #6
-    load r1, Level
+    load r1, Level    ; variavel que guarda o nivel que o usuario esta
     loadn r2, #512
     loadn r3, #48
     add r1, r1, r3
     add r1, r1, r2
     outchar r1, r0
+
     pop r3
     pop r2
     pop r1
@@ -715,10 +762,12 @@ ImprimeString:
     push r2
     push r3
     push r4
+
     loadn r4, #'\0'
+
 ImprimeStringLoop:
-    loadi r3, r1
-    cmp r3, r4
+    loadi r3, r1 ; percorre como vetor a string 
+    cmp r3, r4  ; criterio de parada r4 == \0
     jeq SaiImprimeString
     add r3, r3, r2
     outchar r3, r0
@@ -726,6 +775,7 @@ ImprimeStringLoop:
     inc r1
     jmp ImprimeStringLoop
 SaiImprimeString:
+    
     pop r4
     pop r3
     pop r2
@@ -733,6 +783,7 @@ SaiImprimeString:
     pop r0
     rts
 
+; funcao LimpaTela somente imprime um monte de espacos na tela para apagar tudo
 LimpaTela:
     push r0
     push r1
@@ -750,6 +801,9 @@ LimpaLoop:
     pop r0
     rtr
 
+
+; aqui começam as funcoes que sao geradas pelo Criador de Telas em Assembly
+; as quais fazem o jogo ficar mais bonito e trocar de telas sempre
 printTelaInicioScreen:
     push r0
     push r1
@@ -821,7 +875,7 @@ printTelaWinLoop:
     rts
 
 ; ==================================================================
-; 6. dados estaticos (telas e fundos)
+; 7. dados (telas e fundos)
 ; ==================================================================
 
 TelaInicioDados : var #1200
