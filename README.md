@@ -15,8 +15,8 @@ O jogo foi projetado para demonstrar como estruturas de software podem ser imple
 - Código-fonte do jogo em Assembly totalmente documentado.
 - Arquivos de teste das intruções do Processador ICMC (cpuram4.mif e TestaCPUmodificado.asm).
 - Implementação em C do Processador ICMC (simple_simulalator_template.c).
-- Charmap.mif modificado com caracteres especiais criados pelo grupo no Software de Criação de Telas em Assembly.
-- Algumas Screeshots das telas presentes no jogo
+- Charmap.mif modificado com caracteres especiais criados pelo grupo no SOftware de Criação de Telas em Assembly.
+- 
 
 ## ▶️ Como executar
 1. Tenha em mãos o simulador e o montador do processador ICMC funcionando.
@@ -43,15 +43,18 @@ As cores das telas variam conforme o nível alcançado pelo jogador:
 
 ### 📸 Screenshots
 
-Aqui estão algumas imagens das telas do nosso jogo:
+Aqui estao algumas imagens das telas do nosso jogo:
 
-![Tela de início](/screenshots_icmc_galaxy/TelaInicioFinal.png)
-![Tela de GameOver](/screenshots_icmc_galaxy/GameOver.png)
-![Tela de Vencer](/screenshots_icmc_galaxy/telawin.png)
-![Tela de Nível 1-3](/screenshots_icmc_galaxy/nivel1-3.png)
-![Tela de Nível 4-6](/screenshots_icmc_galaxy/nivel4-6.png)
-![Tela de Nível 7-9](/screenshots_icmc_galaxy/nivel7-9.png)
+![Tela de inicio](screenshots_icmc_galaxy/TelaInicioFinal.png)
+![Tela de GameOver](screenshots_icmc_galaxy/GameOver.png)
+![Tela de Vencer](screenshots_icmc_galaxy/telawin.png)
+![Tela de Nivel 1-3](screenshots_icmc_galaxy/nivel1-3.png)
+![Tela de Nivel 4-6](screenshots_icmc_galaxy/nivel4-6.png)
+![Tela de Nivel 7-9](screenshots_icmc_galaxy/nivel7-9.png)
 
+### 📸 Video de Explicação
+
+- Link: https://youtu.be/DVhgH9A4jXg
 
 ## 🎯 Objetivo educacional
 Este projeto reforça o entendimento de como conceitos de organização e arquitetura de computadores se traduzem em implementações práticas, tornando evidente a relação entre instruções em baixo nível e o comportamento do software. Além disso o jogo criado explora uma diversidade de funcionalidades que são muito importantes no mundo dos jogos, como colisão, movimento. lógicas de nível, controle de variáveis e muito mais.
