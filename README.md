@@ -43,19 +43,14 @@ As cores das telas variam conforme o nível alcançado pelo jogador:
 
 ### 📸 Screenshots
 
-Aqui estao algumas imagens das telas do nosso jogo:
+Aqui estão algumas imagens das telas do nosso jogo:
 
-```md
-![Tela de inicio](screenshots_icmc_galaxy/TelaInicioFinal.png)
-![Tela de GameOver](screenshots_icmc_galaxy/GameOver.png)
-![Tela de Vencer](screenshots_icmc_galaxy/telawin.png)
-![Tela de Nivel 1-3](screenshots_icmc_galaxy/nivel1-3.png)
-![Tela de Nivel 4-6](screenshots_icmc_galaxy/nivel4-6.png)
-![Tela de Nivel 7-9](screenshots_icmc_galaxy/nivel7-9.png)
-
-
-
-
+![Tela de início](/screenshots_icmc_galaxy/TelaInicioFinal.png)
+![Tela de GameOver](/screenshots_icmc_galaxy/GameOver.png)
+![Tela de Vencer](/screenshots_icmc_galaxy/telawin.png)
+![Tela de Nível 1-3](/screenshots_icmc_galaxy/nivel1-3.png)
+![Tela de Nível 4-6](/screenshots_icmc_galaxy/nivel4-6.png)
+![Tela de Nível 7-9](/screenshots_icmc_galaxy/nivel7-9.png)
 
 
 ## 🎯 Objetivo educacional
