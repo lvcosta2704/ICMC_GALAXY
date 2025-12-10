@@ -15,8 +15,8 @@ O jogo foi projetado para demonstrar como estruturas de software podem ser imple
 - Código-fonte do jogo em Assembly totalmente documentado.
 - Arquivos de teste das intruções do Processador ICMC (cpuram4.mif e TestaCPUmodificado.asm).
 - Implementação em C do Processador ICMC (simple_simulalator_template.c).
-- Charmap.mif modificado com caracteres especiais criados pelo grupo no SOftware de Criação de Telas em Assembly.
-- 
+- Charmap.mif modificado com caracteres especiais criados pelo grupo no Software de Criação de Telas em Assembly.
+- Algumas Screenshots do projeto
 
 ## ▶️ Como executar
 1. Tenha em mãos o simulador e o montador do processador ICMC funcionando.
